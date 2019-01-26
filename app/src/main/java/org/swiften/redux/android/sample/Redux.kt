@@ -8,10 +8,12 @@ package org.swiften.redux.android.sample
 import kotlinx.coroutines.async
 import org.swiften.redux.core.IReducer
 import org.swiften.redux.core.IReduxAction
+import org.swiften.redux.saga.common.catchError
 import org.swiften.redux.saga.common.mapAsync
 import org.swiften.redux.saga.common.put
 import org.swiften.redux.saga.rx.SagaEffects.just
 import org.swiften.redux.saga.rx.SagaEffects.takeLatestAction
+import org.swiften.redux.saga.rx.TakeEffectOptions
 import java.io.Serializable
 
 /** Created by haipham on 26/1/19 */
@@ -57,13 +59,18 @@ object Redux {
   }
 
   object Saga {
-    fun searchSaga(api: ISearchAPI<MusicResult?>) =
-      takeLatestAction<Action.Search.UpdateQuery, String, Any>({ it.query }) { it ->
-        just(it)
-          .mapAsync { this.async { api.searchMusicStore(it) } }
-          .put { Action.UpdateMusicResult(it) }
-      }
+    val takeOptions = TakeEffectOptions(500)
 
-    fun allSagas(api: ISearchAPI<MusicResult?>) = arrayListOf(searchSaga(api))
+    fun searchSaga(api: ISearchAPI<MusicResult?>, query: String) =
+      just(query)
+        .mapAsync { this.async { api.searchMusicStore(it) } }
+        .put { Action.UpdateMusicResult(it) }
+        .catchError {}
+
+    fun allSagas(api: ISearchAPI<MusicResult?>) = arrayListOf(
+      takeLatestAction<Action.Search.UpdateQuery, String, Any>({ it.query }, this.takeOptions) {
+        searchSaga(api, it)
+      }
+    )
   }
 }
