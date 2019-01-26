@@ -5,7 +5,20 @@
 
 package org.swiften.redux.android.sample
 
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
 /** Created by haipham on 26/1/19 */
-class MainActivity : AppCompatActivity() {}
+class MainActivity : AppCompatActivity() {
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    this.setContentView(R.layout.main_activity)
+
+    if (savedInstanceState == null) {
+      this.supportFragmentManager
+        .beginTransaction()
+        .replace(R.id.fragment, MainFragment())
+        .commit()
+    }
+  }
+}

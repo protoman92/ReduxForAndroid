@@ -10,6 +10,7 @@ import com.squareup.leakcanary.LeakCanary
 import org.swiften.redux.android.sample.Redux.State
 import org.swiften.redux.android.ui.AndroidPropInjector
 import org.swiften.redux.android.ui.lifecycle.injectApplicationSerializable
+import org.swiften.redux.android.ui.lifecycle.injectLifecycle
 import org.swiften.redux.core.FinalStore
 
 /** Created by haipham on 26/1/19 */
@@ -21,6 +22,10 @@ class MainApplication : Application() {
     val store = FinalStore(State(), Redux.Reducer)
     val injector = AndroidPropInjector(store)
 
-    injector.injectApplicationSerializable(this) {}
+    injector.injectApplicationSerializable(this) {
+      when (it) {
+        is MainFragment -> this.injectLifecycle(it)
+      }
+    }
   }
 }

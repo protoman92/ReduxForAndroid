@@ -42,6 +42,7 @@ class MainFragment : Fragment(),
   ): View? = inflater.inflate(R.layout.main_fragment, container, false)
 
   override fun beforePropInjectionStarts(sp: StaticProps<Redux.State>) {
+    println("Redux BEFORE")
     this.fragmentManager?.also {
       this.viewPager.adapter = object : FragmentPagerAdapter(it) {
         override fun getItem(position: Int) = when (position) {
