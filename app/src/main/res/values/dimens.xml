@@ -6,6 +6,7 @@
 
 <resources>
   <dimen name="text_view_height">40dp</dimen>
+  <dimen name="text_view_font">16sp</dimen>
   <dimen name="spacing1">8dp</dimen>
   <dimen name="spacing2">16dp</dimen>
 </resources>

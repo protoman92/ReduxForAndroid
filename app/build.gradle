@@ -7,6 +7,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+configurations.all {
+  // Make sure the latest JitPack releases are used.
+  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 repositories {
   jcenter()
   maven { url = "https://jitpack.io" }
@@ -40,7 +45,6 @@ dependencies {
   androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
   implementation "androidx.constraintlayout:constraintlayout:1.1.3"
-  implementation 'com.github.protoman92.KotlinRedux:common-middleware:master-SNAPSHOT'
   implementation 'com.github.protoman92.KotlinRedux:android-all:master-SNAPSHOT'
   implementation "com.beust:klaxon:5.0.1"
 
