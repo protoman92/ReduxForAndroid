@@ -25,6 +25,7 @@ class MainApplication : Application() {
     injector.injectApplicationSerializable(this) {
       when (it) {
         is MainFragment -> this.injectLifecycle(it)
+        is SearchFragment -> this.injectLifecycle(it)
       }
     }
   }

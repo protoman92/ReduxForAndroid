@@ -32,7 +32,7 @@ class MainFragment : Fragment(),
   class A(val selectPage: (Int) -> Unit)
 
   override var reduxProps by ObservableReduxProps<Redux.State, S, A> { _, next ->
-    next?.also { this.viewPager.currentItem = it.state.selectedPage }
+    next?.also { this.view_pager.currentItem = it.state.selectedPage }
   }
 
   override fun onCreateView(
@@ -44,7 +44,7 @@ class MainFragment : Fragment(),
   override fun beforePropInjectionStarts(sp: StaticProps<Redux.State>) {
     println("Redux BEFORE")
     this.fragmentManager?.also {
-      this.viewPager.adapter = object : FragmentPagerAdapter(it) {
+      this.view_pager.adapter = object : FragmentPagerAdapter(it) {
         override fun getItem(position: Int) = when (position) {
           1 -> DetailFragment()
           else -> SearchFragment()

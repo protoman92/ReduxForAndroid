@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) haipham 2019. All rights reserved.
+  ~ Any attempt to reproduce this source code in any form shall be met with legal actions.
+  -->
+
+<resources>
+  <dimen name="text_view_height">40dp</dimen>
+  <dimen name="spacing1">8dp</dimen>
+  <dimen name="spacing2">16dp</dimen>
+</resources>
