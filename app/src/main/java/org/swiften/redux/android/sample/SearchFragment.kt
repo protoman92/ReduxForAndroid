@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.search_fragment.*
 import org.swiften.redux.android.ui.recyclerview.IDiffItemCallback
@@ -25,6 +26,20 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
   IPropMapper<Redux.State, Unit, List<MusicTrack?>?, SearchAdapter.A> by SearchAdapter,
   IDiffItemCallback<MusicTrack?> by SearchAdapter {
   class A
+
+  class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+    IVariablePropContainer<MusicTrack?, A>
+  {
+    override var reduxProps by ObservableVariableProps<MusicTrack?, A> { _, next ->
+      next?.state?.also {
+        this.trackName.text = it.trackName
+        this.artistName.text = it.artistName
+      }
+    }
+
+    private val trackName: TextView = this.itemView.findViewById(R.id.trackName)
+    private val artistName: TextView = this.itemView.findViewById(R.id.artistName)
+  }
 
   companion object :
     IPropMapper<Redux.State, Unit, List<MusicTrack?>?, A>,
@@ -45,22 +60,8 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    val itemView = inflater.inflate(R.layout.view_search_item, parent, false)
+    val itemView = inflater.inflate(R.layout.search_item_view, parent, false)
     return ViewHolder(itemView)
-  }
-
-  class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
-    IVariablePropContainer<MusicTrack?, A>
-  {
-    override var reduxProps by ObservableVariableProps<MusicTrack?, A> { _, next ->
-      next?.state?.also {
-        this.trackName.text = it.trackName
-        this.artistName.text = it.artistName
-      }
-    }
-
-    private val trackName: TextView = this.itemView.findViewById(R.id.trackName)
-    private val artistName: TextView = this.itemView.findViewById(R.id.artistName)
   }
 }
 
@@ -97,6 +98,10 @@ class SearchFragment : Fragment(),
       override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
     })
 
-    sp.injector.injectDiffedAdapter(this, SearchAdapter())
+    this.search_result.also {
+      it.setHasFixedSize(true)
+      it.layoutManager = LinearLayoutManager(this.context)
+      it.adapter = sp.injector.injectDiffedAdapter(this, SearchAdapter())
+    }
   }
 }

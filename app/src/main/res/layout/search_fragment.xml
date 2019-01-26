@@ -13,17 +13,36 @@
   <EditText
     android:id="@+id/search_query"
     android:layout_width="0dp"
-    android:layout_height="@dimen/text_view_height"
+    android:layout_height="wrap_content"
     android:layout_marginTop="@dimen/spacing2"
     android:layout_marginLeft="@dimen/spacing2"
     android:layout_marginStart="@dimen/spacing2"
     android:layout_marginRight="@dimen/spacing2"
     android:layout_marginEnd="@dimen/spacing2"
+    android:inputType="text"
+    android:paddingTop="@dimen/spacing2"
+    android:paddingLeft="@dimen/spacing1"
+    android:paddingStart="@dimen/spacing1"
+    android:paddingRight="@dimen/spacing1"
+    android:paddingEnd="@dimen/spacing1"
+    android:paddingBottom="@dimen/spacing2"
+    android:textSize="@dimen/text_view_font"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:inputType="text"/>
+    app:layout_constraintEnd_toEndOf="parent"/>
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/search_result"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_marginTop="@dimen/spacing2"
+    app:layout_constraintTop_toBottomOf="@id/search_query"
+    app:layout_constraintLeft_toLeftOf="@id/search_query"
+    app:layout_constraintStart_toStartOf="@id/search_query"
+    app:layout_constraintRight_toRightOf="@id/search_query"
+    app:layout_constraintEnd_toEndOf="@id/search_query"
+    app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
+  android:layout_height="wrap_content"
   android:orientation="horizontal">
 
   <TextView
@@ -15,6 +15,8 @@
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="0.5"
+    android:padding="@dimen/spacing1"
+    android:lines="1"
     android:textSize="@dimen/text_view_font"/>
 
   <TextView
@@ -23,6 +25,8 @@
     android:layout_height="match_parent"
     android:layout_weight="0.5"
     android:gravity="end"
+    android:padding="@dimen/spacing1"
+    android:lines="1"
     android:textSize="@dimen/text_view_font"/>
 
 </LinearLayout>
