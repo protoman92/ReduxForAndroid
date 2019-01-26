@@ -11,17 +11,20 @@ import java.io.Serializable
 
 /** Created by haipham on 26/1/19 */
 object Redux {
-  data class State(val query: String? = null) : Serializable
+  data class State(val main: MainFragment.S = MainFragment.S()) : Serializable
 
-  sealed class Action : IReduxAction {
-    data class UpdateQuery(val query: String) : Action()
+  class Action {
+    sealed class Main : IReduxAction {
+      data class UpdateSelectedPage(val page: Int) : Main()
+    }
   }
 
   object Reducer: IReducer<State> {
     override fun invoke(p1: State, p2: IReduxAction): State {
       return when (p2) {
-        is Action -> when (p2) {
-          is Action.UpdateQuery -> p1.copy(p2.query)
+        is Action.Main -> when (p2) {
+          is Action.Main.UpdateSelectedPage ->
+            p1.copy(main = p1.main.copy(selectedPage = p2.page))
         }
 
         else -> p1
