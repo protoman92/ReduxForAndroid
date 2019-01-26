@@ -1,0 +1,43 @@
+/*
+ * Copyright (c) haipham 2019. All rights reserved.
+ * Any attempt to reproduce this source code in any form shall be met with legal actions.
+ */
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+repositories {
+  jcenter()
+  maven { url = "https://jitpack.io" }
+}
+
+android {
+  compileSdkVersion 28
+  defaultConfig {
+    applicationId "org.swiften.redux.android.sample"
+    minSdkVersion 15
+    targetSdkVersion 28
+    versionCode 1
+    versionName "1.0"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+  }
+}
+
+dependencies {
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
+  implementation 'androidx.core:core-ktx:1.1.0-alpha03'
+  testImplementation 'junit:junit:4.12'
+  androidTestImplementation 'androidx.test:runner:1.1.1'
+  androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+  implementation 'com.github.protoman92.KotlinRedux:android-all:master-SNAPSHOT'
+}
