@@ -11,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.main_fragment.*
 import org.swiften.redux.core.IActionDispatcher
 import org.swiften.redux.ui.*
@@ -43,7 +45,7 @@ class MainFragment : Fragment(),
 
   override fun beforePropInjectionStarts(sp: StaticProps<Redux.State>) {
     this.fragmentManager?.also {
-      this.view_pager.adapter = object : FragmentPagerAdapter(it) {
+      val adapter = object : FragmentPagerAdapter(it) {
         override fun getItem(position: Int) = when (position) {
           Constants.MAIN_PAGE_DETAIL_INDEX -> DetailFragment()
           else -> SearchFragment()
@@ -51,6 +53,22 @@ class MainFragment : Fragment(),
 
         override fun getCount() = 2
       }
+
+      this.view_pager.adapter = adapter
+
+      this.view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        override fun onPageScrollStateChanged(state: Int) {}
+
+        override fun onPageScrolled(
+          position: Int,
+          positionOffset: Float,
+          positionOffsetPixels: Int
+        ) {}
+
+        override fun onPageSelected(position: Int) {
+          this@MainFragment.reduxProps?.variable?.action?.selectPage?.invoke(position)
+        }
+      })
     }
   }
 }

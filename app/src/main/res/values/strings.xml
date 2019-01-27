@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ReduxForAndroid</string>
+  <string name="app_name">ReduxForAndroid</string>
+  <string name="placeholder_track_name">No track selected yet</string>
 </resources>
