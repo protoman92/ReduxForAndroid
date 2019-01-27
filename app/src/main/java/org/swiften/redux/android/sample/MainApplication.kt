@@ -39,6 +39,7 @@ class MainApplication : Application() {
       when (it) {
         is MainFragment -> this.injectLifecycle(it)
         is SearchFragment -> this.injectLifecycle(it)
+        is DetailFragment -> this.injectLifecycle(it)
       }
     }
   }

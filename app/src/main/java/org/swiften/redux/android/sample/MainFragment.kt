@@ -46,7 +46,7 @@ class MainFragment : Fragment(),
   override fun beforePropInjectionStarts(sp: StaticProps<Redux.State>) {
     this.fragmentManager?.also {
       val adapter = object : FragmentPagerAdapter(it) {
-        override fun getItem(position: Int) = when (position) {
+        override fun getItem(position: Int): Fragment = when (position) {
           Constants.MAIN_PAGE_DETAIL_INDEX -> DetailFragment()
           else -> SearchFragment()
         }
