@@ -9,9 +9,11 @@ import kotlinx.coroutines.async
 import org.swiften.redux.core.IReducer
 import org.swiften.redux.core.IReduxAction
 import org.swiften.redux.saga.common.catchError
+import org.swiften.redux.saga.common.justThen
 import org.swiften.redux.saga.common.mapAsync
 import org.swiften.redux.saga.common.put
 import org.swiften.redux.saga.rx.SagaEffects.just
+import org.swiften.redux.saga.rx.SagaEffects.justPut
 import org.swiften.redux.saga.rx.SagaEffects.takeLatestAction
 import org.swiften.redux.saga.rx.TakeEffectOptions
 import java.io.Serializable
@@ -31,6 +33,7 @@ object Redux {
     }
 
     sealed class Search : Action() {
+      data class UpdateLoading(val loading: Boolean) : Search()
       data class UpdateQuery(val query: String?) : Search()
     }
 
@@ -55,6 +58,7 @@ object Redux {
           }
 
           is Action.Search -> when (p2) {
+            is Action.Search.UpdateLoading -> p1.copy(search = p1.search.copy(loading = p2.loading))
             is Action.Search.UpdateQuery -> p1.copy(search = p1.search.copy(query = p2.query))
           }
         }
@@ -68,10 +72,12 @@ object Redux {
     val takeOptions = TakeEffectOptions(500)
 
     fun searchSaga(api: ISearchAPI<MusicResult?>, query: String) =
-      just(query)
+      justPut(Action.Search.UpdateLoading(true))
+        .justThen(query)
         .mapAsync { this.async { api.searchMusicStore(it) } }
         .put { Action.UpdateMusicResult(it) }
         .catchError {}
+        .put { Action.Search.UpdateLoading(false) }
 
     fun allSagas(api: ISearchAPI<MusicResult?>) = arrayListOf(
       takeLatestAction<Action.Search.UpdateQuery, String, Any>({ it.query }, this.takeOptions) {

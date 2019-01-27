@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.main_fragment.*
+import kotlinx.android.synthetic.main.search_fragment.*
 import org.swiften.redux.core.IActionDispatcher
 import org.swiften.redux.ui.*
 import java.io.Serializable
@@ -34,7 +35,7 @@ class MainFragment : Fragment(),
   class A(val selectPage: (Int) -> Unit)
 
   override var reduxProps by ObservableReduxProps<Redux.State, S, A> { _, next ->
-    next?.also { this.view_pager.currentItem = it.state.selectedPage }
+    next?.state?.also { this.view_pager.currentItem = it.selectedPage }
   }
 
   override fun onCreateView(

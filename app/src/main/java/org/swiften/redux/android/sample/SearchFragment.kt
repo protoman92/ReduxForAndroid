@@ -77,7 +77,7 @@ class SearchFragment : Fragment(),
   IPropContainer<Redux.State, SearchFragment.S, SearchFragment.A>,
   IPropLifecycleOwner<Redux.State> by EmptyPropLifecycleOwner(),
   IPropMapper<Redux.State, Unit, SearchFragment.S, SearchFragment.A> by SearchFragment {
-  data class S(val query: String? = null)
+  data class S(val query: String? = null, val loading: Boolean = false)
   class A(val updateQuery: (String?) -> Unit)
 
   companion object : IPropMapper<Redux.State, Unit, S, A> {
@@ -87,7 +87,11 @@ class SearchFragment : Fragment(),
     override fun mapState(state: Redux.State, outProps: Unit) = state.search
   }
 
-  override var reduxProps by ObservableReduxProps<Redux.State, S, A> { _, _ -> }
+  override var reduxProps by ObservableReduxProps<Redux.State, S, A> { _, next ->
+    next?.state?.also {
+      this.progress_bar.visibility = if (it.loading) View.VISIBLE else View.INVISIBLE
+    }
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
