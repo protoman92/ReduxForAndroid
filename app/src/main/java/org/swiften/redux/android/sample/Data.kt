@@ -8,6 +8,11 @@ package org.swiften.redux.android.sample
 import java.io.Serializable
 
 /** Created by haipham on 27/1/19 */
+object Constants {
+  const val MAIN_PAGE_SEARCH_INDEX = 0
+  const val MAIN_PAGE_DETAIL_INDEX = 1
+}
+
 data class MusicTrack(
   val artistName: String,
   val currency: String,

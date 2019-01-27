@@ -25,12 +25,11 @@ import org.swiften.redux.ui.*
 class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
   IPropMapper<Redux.State, Unit, List<MusicTrack?>?, SearchAdapter.A> by SearchAdapter,
   IDiffItemCallback<MusicTrack?> by SearchAdapter {
-  class A
+  class A(val selectTrack: (Int?) -> Unit)
 
   class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
-    IVariablePropContainer<MusicTrack?, A>
-  {
-    override var reduxProps by ObservableVariableProps<MusicTrack?, A> { _, next ->
+    IVariablePropContainer<MusicTrack?, A?> {
+    override var reduxProps by ObservableVariableProps<MusicTrack?, A?> { _, next ->
       next?.state?.also {
         this.trackName.text = it.trackName
         this.artistName.text = it.artistName
@@ -39,6 +38,12 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
 
     private val trackName: TextView = this.itemView.findViewById(R.id.trackName)
     private val artistName: TextView = this.itemView.findViewById(R.id.artistName)
+
+    init {
+      this.itemView.setOnClickListener {
+        this@ViewHolder.reduxProps?.action?.selectTrack?.invoke(this@ViewHolder.layoutPosition)
+      }
+    }
   }
 
   companion object :
@@ -52,10 +57,12 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
       return oldItem?.trackName == newItem?.trackName
     }
 
-    override fun mapAction(dispatch: IActionDispatcher, state: Redux.State, outProps: Unit) = A()
+    override fun mapAction(dispatch: IActionDispatcher, state: Redux.State, outProps: Unit) =
+      A { dispatch(Redux.Action.UpdateSelectedTrack(it)) }
 
-    override fun mapState(state: Redux.State, outProps: Unit): List<MusicTrack?>? =
-      state.musicResult?.results
+    override fun mapState(state: Redux.State, outProps: Unit): List<MusicTrack?>? {
+      return state.musicResult?.results
+    }
   }
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

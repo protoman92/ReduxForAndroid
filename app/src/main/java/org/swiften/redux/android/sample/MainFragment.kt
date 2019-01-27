@@ -45,7 +45,7 @@ class MainFragment : Fragment(),
     this.fragmentManager?.also {
       this.view_pager.adapter = object : FragmentPagerAdapter(it) {
         override fun getItem(position: Int) = when (position) {
-          1 -> DetailFragment()
+          Constants.MAIN_PAGE_DETAIL_INDEX -> DetailFragment()
           else -> SearchFragment()
         }
 

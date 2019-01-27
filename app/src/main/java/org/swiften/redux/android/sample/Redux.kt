@@ -21,7 +21,8 @@ object Redux {
   data class State(
     val main: MainFragment.S = MainFragment.S(),
     val search: SearchFragment.S = SearchFragment.S(),
-    val musicResult: MusicResult? = null
+    val musicResult: MusicResult? = null,
+    val selectedTrack: Int? = null
   ) : Serializable
 
   sealed class Action : IReduxAction {
@@ -34,6 +35,7 @@ object Redux {
     }
 
     data class UpdateMusicResult(val result: MusicResult?) : Action()
+    data class UpdateSelectedTrack(val index: Int?) : Action()
   }
 
   object Reducer: IReducer<State> {
@@ -42,14 +44,18 @@ object Redux {
         is Action -> when (p2) {
           is Action.UpdateMusicResult -> p1.copy(musicResult = p2.result)
 
+          is Action.UpdateSelectedTrack -> p1.copy(
+            selectedTrack = p2.index,
+            main = p1.main.copy(selectedPage = Constants.MAIN_PAGE_DETAIL_INDEX)
+          )
+
           is Action.Main -> when (p2) {
             is Action.Main.UpdateSelectedPage ->
               p1.copy(main = p1.main.copy(selectedPage = p2.page))
           }
 
           is Action.Search -> when (p2) {
-            is Action.Search.UpdateQuery ->
-              p1.copy(search = p1.search.copy(query = p2.query))
+            is Action.Search.UpdateQuery -> p1.copy(search = p1.search.copy(query = p2.query))
           }
         }
 
