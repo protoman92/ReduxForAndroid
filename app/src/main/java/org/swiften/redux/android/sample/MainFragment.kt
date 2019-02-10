@@ -11,31 +11,30 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.main_fragment.*
-import kotlinx.android.synthetic.main.search_fragment.*
 import org.swiften.redux.core.IActionDispatcher
-import org.swiften.redux.ui.*
+import org.swiften.redux.ui.IPropContainer
+import org.swiften.redux.ui.IPropMapper
+import org.swiften.redux.ui.ObservableReduxProp
+import org.swiften.redux.ui.StaticProp
 import java.io.Serializable
 
 /** Created by haipham on 27/1/19 */
-class MainFragment : Fragment(),
-  IPropContainer<Redux.State, MainFragment.S, MainFragment.A>,
-  IPropLifecycleOwner<Redux.State> by EmptyPropLifecycleOwner(),
-  IPropMapper<Redux.State, Unit, MainFragment.S, MainFragment.A> by MainFragment {
+class MainFragment : Fragment(), IPropContainer<Redux.State, Unit, MainFragment.S, MainFragment.A> {
   companion object : IPropMapper<Redux.State, Unit, S, A> {
-    override fun mapAction(dispatch: IActionDispatcher, state: Redux.State, outProps: Unit) =
-      A { dispatch(Redux.Action.Main.UpdateSelectedPage(it)) }
+    override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
+      return A { dispatch(Redux.Action.Main.UpdateSelectedPage(it)) }
+    }
 
-    override fun mapState(state: Redux.State, outProps: Unit) = S(state.main.selectedPage)
+    override fun mapState(state: Redux.State, outProp: Unit) = S(state.main.selectedPage)
   }
 
   data class S(val selectedPage: Int = 0) : Serializable
   class A(val selectPage: (Int) -> Unit)
 
-  override var reduxProps by ObservableReduxProps<Redux.State, S, A> { _, next ->
-    next?.state?.also { this.view_pager.currentItem = it.selectedPage }
+  override var reduxProp by ObservableReduxProp<S, A> { _, next ->
+    next.state?.also { this.view_pager.currentItem = it.selectedPage }
   }
 
   override fun onCreateView(
@@ -44,7 +43,7 @@ class MainFragment : Fragment(),
     savedInstanceState: Bundle?
   ): View? = inflater.inflate(R.layout.main_fragment, container, false)
 
-  override fun beforePropInjectionStarts(sp: StaticProps<Redux.State>) {
+  override fun beforePropInjectionStarts(sp: StaticProp<Redux.State, Unit>) {
     this.fragmentManager?.also {
       val adapter = object : FragmentPagerAdapter(it) {
         override fun getItem(position: Int): Fragment = when (position) {
@@ -67,7 +66,7 @@ class MainFragment : Fragment(),
         ) {}
 
         override fun onPageSelected(position: Int) {
-          this@MainFragment.reduxProps?.variable?.action?.selectPage?.invoke(position)
+          this@MainFragment.reduxProp.action?.selectPage?.invoke(position)
         }
       })
     }

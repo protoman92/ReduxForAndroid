@@ -10,7 +10,7 @@ import com.beust.klaxon.Klaxon
 import com.squareup.leakcanary.LeakCanary
 import org.swiften.redux.android.sample.Redux.State
 import org.swiften.redux.android.ui.AndroidPropInjector
-import org.swiften.redux.android.ui.lifecycle.injectApplicationSerializable
+import org.swiften.redux.android.ui.lifecycle.injectActivitySerializable
 import org.swiften.redux.android.ui.lifecycle.injectLifecycle
 import org.swiften.redux.async.createAsyncMiddleware
 import org.swiften.redux.core.FinalStore
@@ -28,18 +28,17 @@ class MainApplication : Application() {
     val repository = Repository(Klaxon(), api)
 
     val store = applyMiddlewares<Redux.State>(
-      createLoggingMiddleware(),
       createSagaMiddleware(Redux.Saga.allSagas(repository)),
       createAsyncMiddleware()
     )(FinalStore(State(), Redux.Reducer))
 
     val injector = AndroidPropInjector(store)
 
-    injector.injectApplicationSerializable(this) {
+    injector.injectActivitySerializable(this) {
       when (it) {
-        is MainFragment -> this.injectLifecycle(it)
-        is SearchFragment -> this.injectLifecycle(it)
-        is DetailFragment -> this.injectLifecycle(it)
+        is MainFragment -> this.injectLifecycle(Unit, it, MainFragment)
+        is SearchFragment -> this.injectLifecycle(Unit, it, SearchFragment)
+        is DetailFragment -> this.injectLifecycle(Unit, it, DetailFragment)
       }
     }
   }

@@ -20,17 +20,37 @@ import org.swiften.redux.android.ui.recyclerview.IDiffItemCallback
 import org.swiften.redux.android.ui.recyclerview.ReduxRecyclerViewAdapter
 import org.swiften.redux.android.ui.recyclerview.injectDiffedAdapter
 import org.swiften.redux.core.IActionDispatcher
-import org.swiften.redux.ui.*
+import org.swiften.redux.ui.IPropContainer
+import org.swiften.redux.ui.IPropMapper
+import org.swiften.redux.ui.ObservableReduxProp
+import org.swiften.redux.ui.StaticProp
 
-class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
-  IPropMapper<Redux.State, Unit, List<MusicTrack?>?, SearchAdapter.A> by SearchAdapter,
-  IDiffItemCallback<MusicTrack?> by SearchAdapter {
+class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>() {
+  companion object : IPropMapper<Redux.State, Unit, List<S>, A>, IDiffItemCallback<S> {
+    override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
+      return A { dispatch(Redux.Action.UpdateSelectedTrack(it)) }
+    }
+
+    override fun mapState(state: Redux.State, outProp: Unit): List<S> {
+      return (state.musicResult?.results ?: arrayListOf()).map { S(it) }
+    }
+
+    override fun areContentsTheSame(oldItem: S, newItem: S): Boolean {
+      return oldItem == newItem
+    }
+
+    override fun areItemsTheSame(oldItem: S, newItem: S): Boolean {
+      return oldItem.track?.trackName == newItem.track?.trackName
+    }
+  }
+
+  data class S(val track: MusicTrack?)
   class A(val selectTrack: (Int?) -> Unit)
 
   class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
-    IVariablePropContainer<MusicTrack?, A?> {
-    override var reduxProps by ObservableVariableProps<MusicTrack?, A?> { _, next ->
-      next?.state?.also {
+    IPropContainer<Redux.State, Unit, S, A> {
+    override var reduxProp by ObservableReduxProp<S, A> { _, next ->
+      next.state?.track?.also {
         this.trackName.text = it.trackName
         this.artistName.text = it.artistName
       }
@@ -41,27 +61,8 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
 
     init {
       this.itemView.setOnClickListener {
-        this@ViewHolder.reduxProps?.action?.selectTrack?.invoke(this@ViewHolder.layoutPosition)
+        this@ViewHolder.reduxProp.action?.selectTrack?.invoke(this@ViewHolder.layoutPosition)
       }
-    }
-  }
-
-  companion object :
-    IPropMapper<Redux.State, Unit, List<MusicTrack?>?, A>,
-    IDiffItemCallback<MusicTrack?> {
-    override fun areContentsTheSame(oldItem: MusicTrack?, newItem: MusicTrack?): Boolean {
-      return oldItem == newItem
-    }
-
-    override fun areItemsTheSame(oldItem: MusicTrack?, newItem: MusicTrack?): Boolean {
-      return oldItem?.trackName == newItem?.trackName
-    }
-
-    override fun mapAction(dispatch: IActionDispatcher, state: Redux.State, outProps: Unit) =
-      A { dispatch(Redux.Action.UpdateSelectedTrack(it)) }
-
-    override fun mapState(state: Redux.State, outProps: Unit): List<MusicTrack?>? {
-      return state.musicResult?.results
     }
   }
 
@@ -74,21 +75,21 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>(),
 
 /** Created by haipham on 27/1/19 */
 class SearchFragment : Fragment(),
-  IPropContainer<Redux.State, SearchFragment.S, SearchFragment.A>,
-  IPropLifecycleOwner<Redux.State> by EmptyPropLifecycleOwner(),
+  IPropContainer<Redux.State, Unit, SearchFragment.S, SearchFragment.A>,
   IPropMapper<Redux.State, Unit, SearchFragment.S, SearchFragment.A> by SearchFragment {
+  companion object : IPropMapper<Redux.State, Unit, S, A> {
+    override fun mapState(state: Redux.State, outProp: Unit) = state.search
+
+    override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
+      return A { dispatch(Redux.Action.Search.UpdateQuery(it)) }
+    }
+  }
+
   data class S(val query: String? = null, val loading: Boolean = false)
   class A(val updateQuery: (String?) -> Unit)
 
-  companion object : IPropMapper<Redux.State, Unit, S, A> {
-    override fun mapAction(dispatch: IActionDispatcher, state: Redux.State, outProps: Unit) =
-      A { dispatch(Redux.Action.Search.UpdateQuery(it)) }
-
-    override fun mapState(state: Redux.State, outProps: Unit) = state.search
-  }
-
-  override var reduxProps by ObservableReduxProps<Redux.State, S, A> { _, next ->
-    next?.state?.also {
+  override var reduxProp by ObservableReduxProp<S, A> { _, next ->
+    next.state?.also {
       this.progress_bar.visibility = if (it.loading) View.VISIBLE else View.INVISIBLE
     }
   }
@@ -99,10 +100,10 @@ class SearchFragment : Fragment(),
     savedInstanceState: Bundle?
   ): View? = inflater.inflate(R.layout.search_fragment, container, false)
 
-  override fun beforePropInjectionStarts(sp: StaticProps<Redux.State>) {
+  override fun beforePropInjectionStarts(sp: StaticProp<Redux.State, Unit>) {
     this.search_query.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {
-        this@SearchFragment.reduxProps?.variable?.action?.updateQuery?.invoke(s?.toString())
+        this@SearchFragment.reduxProp.action?.updateQuery?.invoke(s?.toString())
       }
 
       override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -112,7 +113,14 @@ class SearchFragment : Fragment(),
     this.search_result.also {
       it.setHasFixedSize(true)
       it.layoutManager = LinearLayoutManager(this.context)
-      it.adapter = sp.injector.injectDiffedAdapter(this, SearchAdapter())
+
+      it.adapter = sp.injector.injectDiffedAdapter(
+        Unit,
+        this@SearchFragment,
+        SearchAdapter(),
+        SearchAdapter,
+        SearchAdapter
+      )
     }
   }
 }
