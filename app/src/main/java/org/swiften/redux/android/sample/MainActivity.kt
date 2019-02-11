@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     this.setContentView(R.layout.main_activity)
+    this.supportActionBar?.hide()
 
     if (savedInstanceState == null) {
       this.supportFragmentManager

@@ -26,3 +26,9 @@ data class MusicResult(
   val resultCount: Int,
   val results: List<MusicTrack>
 ) : Serializable
+
+enum class ResultCount(val count: Int) {
+  FIVE(5),
+  TEN(10),
+  TWENTY(20)
+}
