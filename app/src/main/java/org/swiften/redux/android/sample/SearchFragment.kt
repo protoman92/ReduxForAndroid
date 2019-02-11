@@ -85,12 +85,17 @@ class SearchFragment : Fragment(),
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
       return A (
         updateQuery =  { dispatch(Redux.Action.Search.UpdateQuery(it)) },
-        updateResultCount = {}
+        updateResultCount = { dispatch(Redux.Action.Search.UpdateResultCount(it)) }
       )
     }
   }
 
-  data class S(val query: String? = null, val loading: Boolean = false)
+  data class S(
+    val query: String? = null,
+    val loading: Boolean = false,
+    val resultCount: ResultCount? = ResultCount.FIVE
+  )
+
   class A(val updateQuery: (String?) -> Unit, val updateResultCount: (ResultCount?) -> Unit)
 
   override var reduxProp by ObservableReduxProp<S, A> { _, next ->

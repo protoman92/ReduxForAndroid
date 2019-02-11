@@ -35,6 +35,7 @@ object Redux {
     sealed class Search : Action() {
       data class UpdateLoading(val loading: Boolean) : Search()
       data class UpdateQuery(val query: String?) : Search()
+      data class UpdateResultCount(val resultCount: ResultCount?) : Search()
     }
 
     data class UpdateMusicResult(val result: MusicResult?) : Action()
@@ -60,6 +61,9 @@ object Redux {
           is Action.Search -> when (p2) {
             is Action.Search.UpdateLoading -> p1.copy(search = p1.search.copy(loading = p2.loading))
             is Action.Search.UpdateQuery -> p1.copy(search = p1.search.copy(query = p2.query))
+
+            is Action.Search.UpdateResultCount ->
+              p1.copy(search = p1.search.copy(resultCount = p2.resultCount))
           }
         }
 
