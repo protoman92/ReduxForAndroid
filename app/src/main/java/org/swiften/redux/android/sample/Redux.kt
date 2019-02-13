@@ -6,14 +6,12 @@
 package org.swiften.redux.android.sample
 
 import kotlinx.coroutines.async
-import org.swiften.redux.core.Boxed
+import org.swiften.kotlinfp.Option
 import org.swiften.redux.core.IReducer
 import org.swiften.redux.core.IReduxAction
-import org.swiften.redux.saga.common.catchError
-import org.swiften.redux.saga.common.justThen
-import org.swiften.redux.saga.common.mapAsync
-import org.swiften.redux.saga.common.put
-import org.swiften.redux.saga.rx.SagaEffects.justPut
+import org.swiften.redux.saga.common.*
+import org.swiften.redux.saga.rx.SagaEffects.putInStore
+import org.swiften.redux.saga.rx.SagaEffects.selectFromState
 import org.swiften.redux.saga.rx.SagaEffects.takeLatestAction
 import org.swiften.redux.saga.rx.TakeEffectOptions
 import java.io.Serializable
@@ -33,7 +31,7 @@ object Redux {
     }
 
     sealed class Search : Action() {
-      data class UpdateLoading(val loading: Boolean) : Search()
+      data class SetLoading(val loading: Boolean) : Search()
       data class UpdateQuery(val query: String?) : Search()
       data class UpdateResultCount(val resultCount: ResultCount?) : Search()
     }
@@ -59,7 +57,7 @@ object Redux {
           }
 
           is Action.Search -> when (p2) {
-            is Action.Search.UpdateLoading -> p1.copy(search = p1.search.copy(loading = p2.loading))
+            is Action.Search.SetLoading -> p1.copy(search = p1.search.copy(loading = p2.loading))
             is Action.Search.UpdateQuery -> p1.copy(search = p1.search.copy(query = p2.query))
 
             is Action.Search.UpdateResultCount ->
@@ -75,18 +73,27 @@ object Redux {
   object Saga {
     val takeOptions = TakeEffectOptions(500)
 
-    fun searchSaga(api: ISearchAPI<MusicResult?>, query: String) =
-      justPut(Action.Search.UpdateLoading(true))
-        .justThen(query)
-        .mapAsync { this.async { Boxed(api.searchMusicStore(it)) } }
-        .put { Action.UpdateMusicResult(it.value) }
-        .catchError {}
-        .put { Action.Search.UpdateLoading(false) }
-
-    fun allSagas(api: ISearchAPI<MusicResult?>) = arrayListOf(
-      takeLatestAction<Action.Search.UpdateQuery, String, Any>({ it.query }, this.takeOptions) {
-        searchSaga(api, it)
+    fun searchSaga(api: ISearchAPI<MusicResult?>): SagaEffect<Any> {
+      return takeLatestAction<Action.Search, Unit, Any>({
+        when (it) {
+          is Action.Search.UpdateQuery -> Unit
+          is Action.Search.UpdateResultCount -> Unit
+          else -> null
+        }
+      }, this.takeOptions) { _ ->
+        selectFromState(State::class) {
+          Option.wrap(it.search.query)
+            .zipWithNullable(it.search.resultCount) { a, b -> a to b.count } }
+          .mapIgnoringNull { it.value }
+          .thenMightAsWell(putInStore(Action.Search.SetLoading(true)))
+          .mapAsync { this.async {
+            Option.wrap(api.searchMusicStore(it.first, it.second))
+          } }
+          .putInStore { Action.UpdateMusicResult(it.value) }
+          .thenNoMatterWhat(putInStore(Action.Search.SetLoading(false)))
       }
-    )
+    }
+
+    fun allSagas(api: ISearchAPI<MusicResult?>) = arrayListOf(searchSaga(api))
   }
 }

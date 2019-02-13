@@ -12,7 +12,7 @@ class Repository(
   private val decoder: Klaxon,
   private val api: ISearchAPI<String>
 ) : ISearchAPI<MusicResult?> {
-  override fun searchMusicStore(query: String): MusicResult? {
-    return this.api.searchMusicStore(query).let { this.decoder.parse<MusicResult>(it) }
+  override fun searchMusicStore(query: String, limit: Int): MusicResult? {
+    return this.api.searchMusicStore(query, limit).let { this.decoder.parse<MusicResult>(it) }
   }
 }
