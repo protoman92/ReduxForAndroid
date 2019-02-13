@@ -33,7 +33,7 @@ object Redux {
     sealed class Search : Action() {
       data class SetLoading(val loading: Boolean) : Search()
       data class UpdateQuery(val query: String?) : Search()
-      data class UpdateResultCount(val resultCount: ResultCount?) : Search()
+      data class UpdateLimit(val limit: ResultLimit?) : Search()
     }
 
     data class UpdateMusicResult(val result: MusicResult?) : Action()
@@ -60,8 +60,8 @@ object Redux {
             is Action.Search.SetLoading -> p1.copy(search = p1.search.copy(loading = p2.loading))
             is Action.Search.UpdateQuery -> p1.copy(search = p1.search.copy(query = p2.query))
 
-            is Action.Search.UpdateResultCount ->
-              p1.copy(search = p1.search.copy(resultCount = p2.resultCount))
+            is Action.Search.UpdateLimit ->
+              p1.copy(search = p1.search.copy(limit = p2.limit))
           }
         }
 
@@ -77,13 +77,13 @@ object Redux {
       return takeLatestAction<Action.Search, Unit, Any>({
         when (it) {
           is Action.Search.UpdateQuery -> Unit
-          is Action.Search.UpdateResultCount -> Unit
+          is Action.Search.UpdateLimit -> Unit
           else -> null
         }
       }, this.takeOptions) { _ ->
         selectFromState(State::class) {
           Option.wrap(it.search.query)
-            .zipWithNullable(it.search.resultCount) { a, b -> a to b.count } }
+            .zipWithNullable(it.search.limit) { a, b -> a to b.count } }
           .mapIgnoringNull { it.value }
           .thenMightAsWell(putInStore(Action.Search.SetLoading(true)))
           .mapAsync { this.async {

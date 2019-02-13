@@ -24,7 +24,7 @@
     style="?android:attr/progressBarStyleHorizontal"/>
 
   <androidx.appcompat.widget.AppCompatSpinner
-    android:id="@+id/select_result_count"
+    android:id="@+id/select_result_limit"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginRight="@dimen/spacing2"
@@ -48,11 +48,11 @@
     android:paddingEnd="@dimen/spacing1"
     android:paddingBottom="@dimen/spacing2"
     android:textSize="@dimen/text_view_font"
-    app:layout_constraintTop_toBottomOf="@id/select_result_count"
+    app:layout_constraintTop_toBottomOf="@id/select_result_limit"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintRight_toRightOf="@id/select_result_count"
-    app:layout_constraintEnd_toEndOf="@id/select_result_count"/>
+    app:layout_constraintRight_toRightOf="@id/select_result_limit"
+    app:layout_constraintEnd_toEndOf="@id/select_result_limit"/>
 
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/search_result"

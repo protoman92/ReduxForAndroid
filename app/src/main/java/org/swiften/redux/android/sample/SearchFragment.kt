@@ -85,7 +85,7 @@ class SearchFragment : Fragment(),
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
       return A (
         updateQuery =  { dispatch(Redux.Action.Search.UpdateQuery(it)) },
-        updateResultCount = { dispatch(Redux.Action.Search.UpdateResultCount(it)) }
+        updateLimit = { dispatch(Redux.Action.Search.UpdateLimit(it)) }
       )
     }
   }
@@ -93,10 +93,10 @@ class SearchFragment : Fragment(),
   data class S(
     val query: String? = null,
     val loading: Boolean = false,
-    val resultCount: ResultCount? = ResultCount.FIVE
+    val limit: ResultLimit? = ResultLimit.FIVE
   )
 
-  class A(val updateQuery: (String?) -> Unit, val updateResultCount: (ResultCount?) -> Unit)
+  class A(val updateQuery: (String?) -> Unit, val updateLimit: (ResultLimit?) -> Unit)
 
   override var reduxProp by ObservableReduxProp<S, A> { _, next ->
     next.state?.also {
@@ -111,7 +111,7 @@ class SearchFragment : Fragment(),
   ): View? = inflater.inflate(R.layout.search_fragment, container, false)
 
   override fun beforePropInjectionStarts(sp: StaticProp<Redux.State, Unit>) {
-    val selectableResultCounts = ResultCount.values()
+    val selectableLimits = ResultLimit.values()
 
     this.search_query.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {
@@ -135,19 +135,19 @@ class SearchFragment : Fragment(),
       )
     }
 
-    this.select_result_count.also { spinner ->
+    this.select_result_limit.also { spinner ->
       spinner.adapter = ArrayAdapter(
         this.requireContext(),
         android.R.layout.simple_spinner_dropdown_item,
-        selectableResultCounts.map { it.count }
+        selectableLimits.map { it.count }
       )
 
       spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onNothingSelected(parent: AdapterView<*>?) {}
 
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-          val selectedResultCount = selectableResultCounts.elementAtOrNull(position)
-          this@SearchFragment.reduxProp.action?.updateResultCount?.invoke(selectedResultCount)
+          val selectedLimit = selectableLimits.elementAtOrNull(position)
+          this@SearchFragment.reduxProp.action?.updateLimit?.invoke(selectedLimit)
         }
       }
     }
