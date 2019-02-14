@@ -1,4 +1,5 @@
 <resources>
   <string name="app_name">ReduxForAndroid</string>
   <string name="placeholder_track_name">No track selected yet</string>
+  <string name="fetch_limit">Fetch limit</string>
 </resources>
