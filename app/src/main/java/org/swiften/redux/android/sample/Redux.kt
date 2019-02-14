@@ -9,11 +9,12 @@ import kotlinx.coroutines.async
 import org.swiften.kotlinfp.Option
 import org.swiften.redux.core.IReducer
 import org.swiften.redux.core.IReduxAction
+import org.swiften.redux.core.IReduxActionWithKey
 import org.swiften.redux.saga.common.*
 import org.swiften.redux.saga.rx.SagaEffects.putInStore
 import org.swiften.redux.saga.rx.SagaEffects.selectFromState
-import org.swiften.redux.saga.rx.SagaEffects.takeLatestAction
-import org.swiften.redux.saga.rx.TakeEffectOptions
+import org.swiften.redux.saga.rx.SagaEffects.takeLatest
+import org.swiften.redux.saga.rx.debounceTake
 import java.io.Serializable
 
 /** Created by haipham on 26/1/19 */
@@ -31,9 +32,21 @@ object Redux {
     }
 
     sealed class Search : Action() {
+      companion object {
+        const val UPDATE_QUERY = "UPDATE_QUERY"
+        const val UPDATE_LIMIT = "UPDATE_LIMIT"
+      }
+
       data class SetLoading(val loading: Boolean) : Search()
-      data class UpdateQuery(val query: String?) : Search()
-      data class UpdateLimit(val limit: ResultLimit?) : Search()
+
+      data class UpdateQuery(val query: String?) : Search(), IReduxActionWithKey {
+        override val key: String get() = Search.UPDATE_QUERY
+
+      }
+
+      data class UpdateLimit(val limit: ResultLimit?) : Search(), IReduxActionWithKey {
+        override val key: String get() = Search.UPDATE_LIMIT
+      }
     }
 
     data class UpdateMusicResult(val result: MusicResult?) : Action()
@@ -71,27 +84,18 @@ object Redux {
   }
 
   object Saga {
-    val takeOptions = TakeEffectOptions(500)
-
+    @Suppress("MemberVisibilityCanBePrivate")
     fun searchSaga(api: ISearchAPI<MusicResult?>): SagaEffect<Any> {
-      return takeLatestAction<Action.Search, Unit, Any>({
-        when (it) {
-          is Action.Search.UpdateQuery -> Unit
-          is Action.Search.UpdateLimit -> Unit
-          else -> null
-        }
-      }, this.takeOptions) { _ ->
+      return takeLatest(arrayListOf(Action.Search.UPDATE_LIMIT, Action.Search.UPDATE_QUERY)) { _ ->
         selectFromState(State::class) {
-          Option.wrap(it.search.query)
-            .zipWithNullable(it.search.limit) { a, b -> a to b.count } }
+          Option.wrap(it.search.query).zipWithNullable(it.search.limit) { a, b -> a to b.count }
+        }
           .mapIgnoringNull { it.value }
           .thenMightAsWell(putInStore(Action.Search.SetLoading(true)))
-          .mapAsync { this.async {
-            Option.wrap(api.searchMusicStore(it.first, it.second))
-          } }
+          .mapAsync { this.async { Option.wrap(api.searchMusicStore(it.first, it.second)) } }
           .putInStore { Action.UpdateMusicResult(it.value) }
           .thenNoMatterWhat(putInStore(Action.Search.SetLoading(false)))
-      }
+      }.debounceTake(1000)
     }
 
     fun allSagas(api: ISearchAPI<MusicResult?>) = arrayListOf(searchSaga(api))
