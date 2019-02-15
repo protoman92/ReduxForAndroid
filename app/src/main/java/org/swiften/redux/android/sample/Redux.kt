@@ -10,7 +10,12 @@ import org.swiften.kotlinfp.Option
 import org.swiften.redux.core.IReducer
 import org.swiften.redux.core.IReduxAction
 import org.swiften.redux.core.IReduxActionWithKey
-import org.swiften.redux.saga.common.*
+import org.swiften.redux.saga.common.SagaEffect
+import org.swiften.redux.saga.common.mapAsync
+import org.swiften.redux.saga.common.mapIgnoringNull
+import org.swiften.redux.saga.common.putInStore
+import org.swiften.redux.saga.common.thenMightAsWell
+import org.swiften.redux.saga.common.thenNoMatterWhat
 import org.swiften.redux.saga.rx.SagaEffects.putInStore
 import org.swiften.redux.saga.rx.SagaEffects.selectFromState
 import org.swiften.redux.saga.rx.SagaEffects.takeLatestForKeys
@@ -52,7 +57,6 @@ object Redux {
 
       data class UpdateQuery(val query: String?) : Search(), IReduxActionWithKey {
         override val key: String get() = Search.UPDATE_QUERY
-
       }
 
       data class UpdateLimit(val limit: ResultLimit?) : Search(), IReduxActionWithKey {
@@ -64,7 +68,7 @@ object Redux {
     data class UpdateSelectedTrack(val index: Int?) : Action()
   }
 
-  object Reducer: IReducer<State> {
+  object Reducer : IReducer<State> {
     override fun invoke(p1: State, p2: IReduxAction): State {
       return when (p2) {
         is Action -> when (p2) {

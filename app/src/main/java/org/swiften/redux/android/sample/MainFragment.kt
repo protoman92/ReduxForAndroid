@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import kotlinx.android.synthetic.main.main_fragment.*
+import kotlinx.android.synthetic.main.main_fragment.view_pager
 import org.swiften.redux.core.IActionDispatcher
 import org.swiften.redux.ui.IPropContainer
 import org.swiften.redux.ui.IPropMapper
@@ -62,7 +62,7 @@ class MainFragment : Fragment(), IPropContainer<
 
         override fun getCount() = 2
       }
-      
+
       this.view_pager.adapter = adapter
 
       this.view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {

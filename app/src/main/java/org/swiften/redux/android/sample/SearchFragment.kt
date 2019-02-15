@@ -17,7 +17,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.search_fragment.*
+import kotlinx.android.synthetic.main.search_fragment.progress_bar
+import kotlinx.android.synthetic.main.search_fragment.search_query
+import kotlinx.android.synthetic.main.search_fragment.search_result
+import kotlinx.android.synthetic.main.search_fragment.select_result_limit
 import org.swiften.redux.android.ui.recyclerview.IDiffItemCallback
 import org.swiften.redux.android.ui.recyclerview.ReduxRecyclerViewAdapter
 import org.swiften.redux.android.ui.recyclerview.injectDiffedAdapter
@@ -88,8 +91,8 @@ class SearchFragment : Fragment(), IPropContainer<
     override fun mapState(state: ILocalState, outProp: Unit) = state.search
 
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
-      return A (
-        updateQuery =  { dispatch(Redux.Action.Search.UpdateQuery(it)) },
+      return A(
+        updateQuery = { dispatch(Redux.Action.Search.UpdateQuery(it)) },
         updateLimit = { dispatch(Redux.Action.Search.UpdateLimit(it)) }
       )
     }
