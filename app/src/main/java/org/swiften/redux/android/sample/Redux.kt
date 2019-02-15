@@ -18,13 +18,24 @@ import org.swiften.redux.saga.rx.debounceTake
 import java.io.Serializable
 
 /** Created by haipham on 26/1/19 */
+interface IMusicResultProvider {
+  val musicResult: MusicResult?
+}
+
+interface ISelectedTrackProvider {
+  val selectedTrack: Int?
+}
+
 object Redux {
   data class State(
-    val main: MainFragment.S = MainFragment.S(),
-    val search: SearchFragment.S = SearchFragment.S(),
-    val musicResult: MusicResult? = null,
-    val selectedTrack: Int? = null
-  ) : Serializable
+    override val main: MainFragment.S = MainFragment.S(),
+    override val search: SearchFragment.S = SearchFragment.S(),
+    override val musicResult: MusicResult? = null,
+    override val selectedTrack: Int? = null
+  ) : Serializable,
+    DetailFragment.ILocalState,
+    MainFragment.ILocalState,
+    SearchFragment.ILocalState
 
   sealed class Action : IReduxAction {
     sealed class Main : Action() {

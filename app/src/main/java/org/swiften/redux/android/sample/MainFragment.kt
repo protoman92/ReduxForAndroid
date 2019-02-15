@@ -21,13 +21,22 @@ import org.swiften.redux.ui.StaticProp
 import java.io.Serializable
 
 /** Created by haipham on 27/1/19 */
-class MainFragment : Fragment(), IPropContainer<Redux.State, Unit, MainFragment.S, MainFragment.A> {
-  companion object : IPropMapper<Redux.State, Unit, S, A> {
+class MainFragment : Fragment(), IPropContainer<
+  MainFragment.ILocalState,
+  Unit,
+  MainFragment.S,
+  MainFragment.A
+  > {
+  companion object : IPropMapper<ILocalState, Unit, S, A> {
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
       return A { dispatch(Redux.Action.Main.UpdateSelectedPage(it)) }
     }
 
-    override fun mapState(state: Redux.State, outProp: Unit) = S(state.main.selectedPage)
+    override fun mapState(state: ILocalState, outProp: Unit) = S(state.main.selectedPage)
+  }
+
+  interface ILocalState {
+    val main: S
   }
 
   data class S(val selectedPage: Int = 0) : Serializable
@@ -43,7 +52,7 @@ class MainFragment : Fragment(), IPropContainer<Redux.State, Unit, MainFragment.
     savedInstanceState: Bundle?
   ): View? = inflater.inflate(R.layout.main_fragment, container, false)
 
-  override fun beforePropInjectionStarts(sp: StaticProp<Redux.State, Unit>) {
+  override fun beforePropInjectionStarts(sp: StaticProp<ILocalState, Unit>) {
     this.fragmentManager?.also {
       val adapter = object : FragmentPagerAdapter(it) {
         override fun getItem(position: Int): Fragment = when (position) {
@@ -53,7 +62,7 @@ class MainFragment : Fragment(), IPropContainer<Redux.State, Unit, MainFragment.
 
         override fun getCount() = 2
       }
-
+      
       this.view_pager.adapter = adapter
 
       this.view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {

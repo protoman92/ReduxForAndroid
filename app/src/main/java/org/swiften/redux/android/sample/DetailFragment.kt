@@ -17,14 +17,21 @@ import org.swiften.redux.ui.IPropMapper
 import org.swiften.redux.ui.ObservableReduxProp
 
 /** Created by haipham on 27/1/19 */
-class DetailFragment : Fragment(), IPropContainer<Redux.State, Unit, DetailFragment.S, Unit> {
-  companion object : IPropMapper<Redux.State, Unit, DetailFragment.S, Unit> {
-    override fun mapState(state: Redux.State, outProp: Unit): S {
+class DetailFragment : Fragment(), IPropContainer<
+  DetailFragment.ILocalState,
+  Unit,
+  DetailFragment.S,
+  Unit
+  > {
+  companion object : IPropMapper<ILocalState, Unit, DetailFragment.S, Unit> {
+    override fun mapState(state: ILocalState, outProp: Unit): S {
       return S(state.selectedTrack?.let { i -> state.musicResult?.results?.elementAtOrNull(i) })
     }
 
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit) = Unit
   }
+
+  interface ILocalState : IMusicResultProvider, ISelectedTrackProvider
 
   data class S(val track: MusicTrack?)
 

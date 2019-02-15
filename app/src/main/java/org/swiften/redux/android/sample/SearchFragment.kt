@@ -29,12 +29,12 @@ import org.swiften.redux.ui.StaticProp
 
 /** Created by haipham on 27/1/19 */
 class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>() {
-  companion object : IPropMapper<Redux.State, Unit, List<S>, A>, IDiffItemCallback<S> {
+  companion object : IPropMapper<ILocalState, Unit, List<S>, A>, IDiffItemCallback<S> {
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
       return A { dispatch(Redux.Action.UpdateSelectedTrack(it)) }
     }
 
-    override fun mapState(state: Redux.State, outProp: Unit): List<S> {
+    override fun mapState(state: ILocalState, outProp: Unit): List<S> {
       return (state.musicResult?.results ?: arrayListOf()).map { S(it) }
     }
 
@@ -47,11 +47,13 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>() {
     }
   }
 
+  interface ILocalState : IMusicResultProvider
+
   data class S(val track: MusicTrack?)
   class A(val selectTrack: (Int?) -> Unit)
 
   class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
-    IPropContainer<Redux.State, Unit, S, A> {
+    IPropContainer<ILocalState, Unit, S, A> {
     override var reduxProp by ObservableReduxProp<S, A> { _, next ->
       next.state?.track?.also {
         this.trackName.text = it.trackName
@@ -62,7 +64,7 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>() {
     private val trackName: TextView = this.itemView.findViewById(R.id.trackName)
     private val artistName: TextView = this.itemView.findViewById(R.id.artistName)
 
-    init {
+    override fun beforePropInjectionStarts(sp: StaticProp<ILocalState, Unit>) {
       this.itemView.setOnClickListener {
         this@ViewHolder.reduxProp.action?.selectTrack?.invoke(this@ViewHolder.layoutPosition)
       }
@@ -76,11 +78,14 @@ class SearchAdapter : ReduxRecyclerViewAdapter<SearchAdapter.ViewHolder>() {
   }
 }
 
-class SearchFragment : Fragment(),
-  IPropContainer<Redux.State, Unit, SearchFragment.S, SearchFragment.A>,
-  IPropMapper<Redux.State, Unit, SearchFragment.S, SearchFragment.A> by SearchFragment {
-  companion object : IPropMapper<Redux.State, Unit, S, A> {
-    override fun mapState(state: Redux.State, outProp: Unit) = state.search
+class SearchFragment : Fragment(), IPropContainer<
+  SearchFragment.ILocalState,
+  Unit,
+  SearchFragment.S,
+  SearchFragment.A
+  > {
+  companion object : IPropMapper<ILocalState, Unit, S, A> {
+    override fun mapState(state: ILocalState, outProp: Unit) = state.search
 
     override fun mapAction(dispatch: IActionDispatcher, outProp: Unit): A {
       return A (
@@ -88,6 +93,10 @@ class SearchFragment : Fragment(),
         updateLimit = { dispatch(Redux.Action.Search.UpdateLimit(it)) }
       )
     }
+  }
+
+  interface ILocalState : SearchAdapter.ILocalState {
+    val search: S
   }
 
   data class S(
@@ -110,7 +119,7 @@ class SearchFragment : Fragment(),
     savedInstanceState: Bundle?
   ): View? = inflater.inflate(R.layout.search_fragment, container, false)
 
-  override fun beforePropInjectionStarts(sp: StaticProp<Redux.State, Unit>) {
+  override fun beforePropInjectionStarts(sp: StaticProp<ILocalState, Unit>) {
     val selectableLimits = ResultLimit.values()
 
     this.search_query.addTextChangedListener(object : TextWatcher {
